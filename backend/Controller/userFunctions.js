@@ -96,12 +96,12 @@ export const testUserApi = expressAsyncHandler(async(req,res)=>{
 export const searchById = expressAsyncHandler(async(req,res)=>{
         const id = (req.params.id);
         if(!id){
-            res.status(100)
+            res.status(400)
             throw new Error("ID feild missing")
         } 
         const result = userData.filter((user)=>user.userID===id);
         if(result.length === 0){
-            res.status(200);
+            res.status(400);
             throw new Error("No user found by ID "+id)
         }else{
             res.json({
@@ -116,7 +116,7 @@ export const searchById = expressAsyncHandler(async(req,res)=>{
 export const addNewUser = expressAsyncHandler(async(req,res)=>{
         const {firstName,lastName,contactNumber,city,address} = req.body;
         if(!firstName||!lastName||!contactNumber||!city||!address){
-            res.status(100)
+            res.status(400)
             throw new Error("One of feild missing")
         }else{
             let lastID = userData.findLast((usr)=>usr.userID)
@@ -151,18 +151,14 @@ export const addNewUser = expressAsyncHandler(async(req,res)=>{
 export const updateUserCityandAddress = expressAsyncHandler(async(req,res)=>{
     const {city,address} = req.body;
         if(!city||!address){
-            res.json({
-                "Status":"OK",
-                "Message":"Missing update feilds"
-            })
+            res.status(400)
+            throw new Error("One of the feilds are missing")
         }else{
             const id = req.params.id;
             const index = userData.findIndex((usr)=>usr.userID===id)
             if(index === -1){
-                res.json({
-                    "Status":"OK",
-                    "Message":"User not found to update"
-                })
+                res.status(400)
+                throw new Error("No user found to update")
             }else{
                 const updateData = {
                     "city":city,
@@ -177,3 +173,19 @@ export const updateUserCityandAddress = expressAsyncHandler(async(req,res)=>{
             }
         }
 })
+
+export const deleteUserByID = expressAsyncHandler(async(req,res)=>{
+            const id =req.params.id;
+            const index = userData.findIndex((usr)=>usr.userID===id);
+            if(index === -1){
+                res.status(400)
+                throw new Error("No user found to delete")
+            }else{
+                userData = userData.filter((usr)=> usr.userID !== id);
+                res.json({
+                    "Stauts":"OK",
+                    "Messgae":"User deleted"
+                })
+            }
+})
+
