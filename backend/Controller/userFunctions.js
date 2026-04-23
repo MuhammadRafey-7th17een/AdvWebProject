@@ -86,9 +86,13 @@ let userData = [
 
 
 export const testUserApi = expressAsyncHandler(async(req,res)=>{
+    const tauha = req.params.id1;
+    const me = req.params.id2;
     res.json({
         "Stauts":"OK",
-        "Msg":"Api working"
+        "Msg":"Api working",
+        "Tauha":tauha,
+        "Me":me
     })
 })
 
@@ -128,6 +132,7 @@ export const addNewUser = expressAsyncHandler(async(req,res)=>{
                 numericalPart = parseInt(lastID.userID.slice(4))
             }
             const id = `USR-${numericalPart+1}`
+                
             const newData = 
                 {
                     "userID":id,
@@ -188,4 +193,3 @@ export const deleteUserByID = expressAsyncHandler(async(req,res)=>{
                 })
             }
 })
-
