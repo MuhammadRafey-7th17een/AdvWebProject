@@ -1,4 +1,6 @@
-import expressAsyncHandler from 'express-async-handler'
+/*import expressAsyncHandler from 'express-async-handler'
+
+    OLD CODE
 
 let userData = [    
     {
@@ -192,4 +194,4 @@ export const deleteUserByID = expressAsyncHandler(async(req,res)=>{
                     "Messgae":"User deleted"
                 })
             }
-})
+})*/
