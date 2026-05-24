@@ -25,6 +25,7 @@ const userSchema = new Schema(
         contact:{
             type:String,
             required:true,
+            unique:true,
             match: [/^\+\d{1,3}-\d{3}-\d{7}$/,"Enter valid contact format +code-3digits-7digits"]
         },
         address:{
@@ -32,6 +33,12 @@ const userSchema = new Schema(
             required:true,
             trim:true
         },
+        password:{
+            type:String,
+            required:true,
+            select:false,
+            minlegth:[5,"Min length for password is 5"]
+        }
         
     },{timestamps:true}
 )

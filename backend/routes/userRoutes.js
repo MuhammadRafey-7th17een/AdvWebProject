@@ -1,10 +1,13 @@
-import { searchByEmail,searchByPhoneNumber } from '../Controller/userController.js';
+import { createUser, deleteUser, searchByEmail,searchByPhoneNumber, updateEmail } from '../Controller/userController.js';
 import express from 'express'
 
 export const userRouter = express.Router()
 
-userRouter.get("/searchE:email",searchByEmail)
-userRouter.get("/searchP:number",searchByPhoneNumber)
+userRouter.get("/searchE/:email",searchByEmail)
+userRouter.get("/searchP",searchByPhoneNumber)
+userRouter.post("/create",createUser)
+userRouter.put("/update/:id/:email",updateEmail)
+userRouter.delete("/delete/:id",deleteUser)
 
 
 

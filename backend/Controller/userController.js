@@ -1,8 +1,38 @@
 import expressAsyncHandler from 'express-async-handler'
+import bcrypt from 'bcrypt'
 import User from '../models/userModel.js'
 
 
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const contactRegex = /^\+\d{1,3}-\d{3}-\d{7}$/
+
+//Create
+export const createUser = expressAsyncHandler(async(req,res)=>{
+    const {fname,lname,email,password,contact,address} = req.body
+    if(!fname||!lname||!email||!password||!address){
+        res.status(400)
+        throw new Error("Input feild missing")
+    }
+    if (!emailRegex.test(email) && !contactRegex.test(contact)) {
+        res.status(400);
+        throw new Error("Invalid email or contact format");
+    }
+    const exisiting = await User.findOne({email,contact})
+    if(exisiting){
+        res.status(400)
+        throw new Error("User already exists")
+    }
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password,salt)
+    const user = await User.create({firstName:fname,lastName:lname,email,contact,password:hashedPassword,address})
+    res.status(201).json({
+        message:"User created",
+        user:{id:user._id,firstName:user.firstName,lastName:user.lastName}
+    })
+})
+
+//Read
 export const searchByEmail = expressAsyncHandler(async(req,res)=>{
     const email = req.params.email;
     
@@ -10,7 +40,7 @@ export const searchByEmail = expressAsyncHandler(async(req,res)=>{
         res.status(400)
         throw new Error("Email feild missing");
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   
     if (!emailRegex.test(email)) {
         res.status(400);
         throw new Error("Invalid email format");
@@ -34,7 +64,7 @@ export const searchByPhoneNumber = expressAsyncHandler(async(req,res)=>{
         res.status(400)
         throw new Error("Email feild missing");
     }
-    const contactRegex = /^\+\d{1,3}-\d{3}-\d{7}$/
+    
     if(!contactRegex.test(contact)){
         res.status(400)
         throw new Error("Invalid contact format")
@@ -52,3 +82,45 @@ export const searchByPhoneNumber = expressAsyncHandler(async(req,res)=>{
 
 })
 
+
+//update
+
+export const updateEmail = expressAsyncHandler(async(req,res)=>{
+    const id = req.params.id
+    const newEmail = req.params.email
+    if(!id||!newEmail){
+        res.status(400)
+        throw new Error("Input feilds missing")
+    }
+    if(!emailRegex.test(newEmail)){
+        res.status(400)
+        throw new Error("Invalid email format")
+    }
+    const user = await User.findByIdAndUpdate(id,{email:newEmail},{new:true,runValidators:true}).select("-__v").lean()
+    if(!user){
+        res.status(404)
+        throw new Error("No user found by given id")
+    }
+    res.status(200).json({
+        message:"Updated",
+        user:user
+    })
+})
+
+//delete
+
+export const deleteUser = expressAsyncHandler(async(req,res)=>{
+    const id = req.params.id
+    if(!id){
+        res.status(400)
+        throw new Error("Input feild missing")
+    }
+    const user = await User.findByIdAndDelete(id)
+    if(!user){
+        res.status(404)
+        throw new Error("User of given id not found")
+    }
+    res.status(204).json({
+        message:`Deleted user ${user.firstName} ${user.lastName}`
+    })
+})

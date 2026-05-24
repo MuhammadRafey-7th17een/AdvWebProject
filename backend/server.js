@@ -7,7 +7,6 @@ import 'dotenv/config'
 
 const app = express()
 const PORT = process.env.PORT
-console.log(PORT)
 app.use(express.json());
 app.use("/user",userRouter);
 app.use(errorMiddleware);
