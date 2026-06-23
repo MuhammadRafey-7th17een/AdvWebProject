@@ -29,9 +29,7 @@ const userSchema = new Schema(
             match: [/^\+\d{1,3}-\d{3}-\d{7}$/,"Enter valid contact format +code-3digits-7digits"]
         },
         address:{
-            type:String,
-            required:true,
-            trim:true
+            city:{type:String, required:true}
         },
         password:{
             type:String,
