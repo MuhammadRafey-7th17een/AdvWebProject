@@ -1,6 +1,7 @@
 import expressAsyncHandler from 'express-async-handler'
 import bcrypt from 'bcrypt'
 import User from '../models/userModel.js'
+import jwt from 'jsonwebtoken'
 
 
 
@@ -27,9 +28,13 @@ export const createUser = expressAsyncHandler(async(req,res)=>{
     const hashedPassword = await bcrypt.hash(password,salt)
     const user = await User.create({firstName:fname,lastName:lname,email,contact,password:hashedPassword,address})
     res.status(201).json({
-        message:"User created",
-        user:{id:user._id,firstName:user.firstName,lastName:user.lastName}
-    })
+    "message": "User created",
+    "user": {
+        "id": user._id,
+        "firstName": user.firstName,
+        "lastName": user.lastName
+    }
+});
 })
 
 //Read
@@ -62,7 +67,7 @@ export const searchByPhoneNumber = expressAsyncHandler(async(req,res)=>{
     const contact = req.query.number;
     if(!contact){
         res.status(400)
-        throw new Error("Email feild missing");
+        throw new Error("contact feild missing");
     }
     
     if(!contactRegex.test(contact)){
@@ -122,5 +127,50 @@ export const deleteUser = expressAsyncHandler(async(req,res)=>{
     }
     res.status(204).json({
         message:`Deleted user ${user.firstName} ${user.lastName}`
+    })
+})
+
+
+//login
+export const login = expressAsyncHandler(async(req,res)=>{
+    const {email,password} = req.body
+    if(!email||!password){
+        res.status(400)
+        throw new Error("Input feild missing")
+    }
+    if(!emailRegex.test(email)){
+        res.status(400);
+        throw new Error("Invalid email format");
+    }
+    const user = await User.findOne({email})
+    if(!user){
+        res.status(404)
+        throw new Error("User of given email not found")
+    }
+    const passMatch = await bcrypt.compare(password,user.password)
+    if(!passMatch){
+        res.status(401)
+        throw new Error("Password Invalid")
+    }
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES }
+    );
+    res.json({
+      message: "Login successful",
+      token
+    });
+})
+
+
+export const getProfile = expressAsyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user.id).select("-password -__v").lean()
+    if(!user){
+        res.status(404)
+        throw new Error("User not found")
+    }
+    res.json({
+        user
     })
 })

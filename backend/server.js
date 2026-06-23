@@ -13,19 +13,9 @@ app.use(express.json());
 app.use(errorMiddleware);
 app.use(authMiddleware)
 
-const limiter = rateLimit({
-    windowMs = 24 * 60 * 60 * 1000,
-    max:(req,res)=>{
-        if(req.user){
-            return Number.MAX_SAFE_INTEGER
-        }
-        else{
-            return 10
-        }
-    },
-    standardHeaders = true,
-    legacyHeaders = false
-})
+
+
+
 app.use("/user",userRouter);
 const url = process.env.Mongo_url
 mongoose.connect(url).then(()=> console.log("Connection built with DB")).catch((err) => console.log("Db error "+err))

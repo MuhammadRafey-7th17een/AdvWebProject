@@ -36,7 +36,7 @@ const userSchema = new Schema(
         password:{
             type:String,
             required:true,
-            select:false,
+            select:true,
             minlegth:[5,"Min length for password is 5"]
         }
         
